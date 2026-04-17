@@ -25,7 +25,10 @@ app.use(helmet({
 app.use(hpp());
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: [
+        "https://chat-app-frontend-1-1.vercel.app", 
+        "http://localhost:5173"                     
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
