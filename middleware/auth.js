@@ -18,8 +18,8 @@ const auth = (req, res, next) => {
         req.userId = decoded.id
         next();
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server error." })
+        console.error("Token verification failed:", err.message);
+        return res.status(401).json({ message: "Token is not valid or expired." });
     } 
 
 }

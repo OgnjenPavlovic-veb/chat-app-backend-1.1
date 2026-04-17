@@ -41,6 +41,11 @@ export const accessChat = async (req, res) => {
 export const getMessages = async (req, res) => {
     // should return messages.
     const { chatId } = req.params;
+    const chatChech = await Chat.findOne({ _id: chatId, users: req.userId });
+    
+    if (!chatChech) {
+        return res.status(403).json({ message: "Access denied. You are not a participant in this chat."});
+    }
 
     if (!chatId) return res.status(400).json({ message: "chatId is required."})
 
@@ -63,15 +68,17 @@ export const sendMessage = async (req, res) => {
     const { chatId, text } = req.body || {};
 
     try {
-
         if (!chatId) return res.status(400).json({ message: "chatId missing. "});
+        const messageChach = await Chat.findOne({ _id: chatId, users: req.userId });
+    
+       if (!messageChach) {
+          return res.status(403).json({ message: "Access denied. You are not a participant in this chat."});
+       }
 
         let imageUrls = [];
 
         if (req.files && req.files.length > 0) {
-            imageUrls = req.files.map(file => 
-            `http://localhost:5000/uploads/${file.filename}`
-            );
+            imageUrls = req.files.map(file => file.filename);
         }
 
         const message = await Message.create({
@@ -101,9 +108,13 @@ export const sendMessage = async (req, res) => {
 export const getSingleChat = async (req, res) => {
     // should return singleChat.
     try {
-        const chat = await Chat.findById(req.params.id)
+        const chat = await Chat.findOne({ _id: req.params.id, users: req.userId })
         .populate("users", "username profile.image")
         .populate("admin", "username");
+
+        if (!chat) {
+            return res.status(404).json({ message: "Chat not found." });
+        }
        
         res.json(chat);
 

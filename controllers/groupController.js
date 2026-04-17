@@ -8,9 +8,7 @@ export const createGroupChat = async (req, res) => {
     try {
         const { name } = req.body;
 
-        const image = req.file
-        ? `http://localhost:5000/uploads/${req.file.filename}`
-        : "";
+        const image = req.file ? req.file.filename : "";
 
         const chat = await Chat.create({
             isGroup: true,
@@ -37,9 +35,7 @@ export const createGroupRequest = async (req, res) => {
 
         const parsedUsers = JSON.parse(users)
 
-        const image = req.file 
-        ? `http://localhost:5000/uploads/${req.file.filename}`
-        : "";
+        const image = req.file ? req.file.filename : "";
 
         const request = await GroupRequest.create({
             groupName: name,

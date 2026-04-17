@@ -25,20 +25,13 @@ const startServer = async () => {
             app.use(attachIO(io));
 
             server.listen(PORT, () => {
-                console.log(`server running on PORT: ${PORT}`);
+                console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
             });
         }
     
-   /*
-        if (process.env.NODE_ENV !== "test") {
-            server.listen(PORT, () => {
-                console.log(`server running on PORT: ${PORT}`)
-            });
-        }
-            */
-
     } catch (err) {
         console.error(err);
+        process.exit(1);
     }
 }
 

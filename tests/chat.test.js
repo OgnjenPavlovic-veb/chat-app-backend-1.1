@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -185,22 +186,13 @@ describe("Chat - getSingleChat", () => {
     });
 
     it("should return 404 if chat not found", async () => {
-        const user = await User.create({
-            username: "user",
-            email: "user@gmail.com",
-            password: "12345678"
-        });
-
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-
-        const fakeId = new mongoose.Types.ObjectId;
-
+        const fakeId = new mongoose.Types.ObjectId();
         const res = await request(app)
         .get(`/api/chat/${fakeId}`)
         .set("Authorization", `Bearer ${token}`);
 
-       expect(res.statusCode).toBe(200);
-       expect(res.body).toBe(null);
+    expect(res.statusCode).toBe(404); 
+    expect(res.body.message).toBe("Chat not found.");
     
     });
 });

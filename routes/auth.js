@@ -4,17 +4,29 @@ import jwt from "jsonwebtoken";
 import auth from "../middleware/auth.js";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
+import rateLimit from "express-rate-limit";
+
+const authLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    max: 5,
+    message: {messgae: "Too many failed attempts from this IP address, try again in 5 minutes."},
+    standardHeaders: true, 
+    legacyHeaders: false,
+});
 
 const router = express.Router();
 
-router.post("/register",
+router.post("/register", authLimiter, [
     body("username")
     .trim()
-    .isLength({ min: 3, max: 20 }),
+    .isLength({ min: 3, max: 20 })
+    .escape(),
     body("email")
     .isEmail()
     .notEmpty()
-    .trim(),
+    .trim()
+    .normalizeEmail()
+    .escape(),
     body("password")
     .trim()
     .isLength({ min: 8, max: 20 })
@@ -34,7 +46,7 @@ router.post("/register",
         return true;
     }),
 
-    async (req, res) => {
+ ], async (req, res) => {
         const error = validationResult(req);
 
         if (!error.isEmpty()) {
@@ -77,7 +89,7 @@ router.post("/register",
 )
 
 
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
     try {
         const { emailOrUsername, password } = req.body;
 
