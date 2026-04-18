@@ -7,8 +7,8 @@ import User from "../models/User.js";
 import rateLimit from "express-rate-limit";
 
 const authLimiter = rateLimit({
-    windowMs: 5 * 60 * 1000,
-    max: 5,
+    windowMs: 15 * 60 * 1000,
+    max: 50,
     message: {messgae: "Too many failed attempts from this IP address, try again in 5 minutes."},
     standardHeaders: true, 
     legacyHeaders: false,
@@ -82,6 +82,11 @@ router.post("/register", authLimiter, [
             })
 
         } catch (err) {
+
+            if (err.code === 11000) {
+            return res.status(400).json({ message: "A user with this email or username already exists." });
+            }
+
             console.error("Register error",err);
             res.status(500).json({ message: "Server error." });
         }
