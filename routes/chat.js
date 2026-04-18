@@ -9,7 +9,7 @@ import { createGroupRequest,
          removeFromGroup, 
          leaveGroup 
         } from "../controllers/groupController.js";
-import { upload } from '../middleware/upload.js';
+import { upload } from '../middleware/cloudinary.js';
 
 const router = express.Router();
 

@@ -5,6 +5,8 @@ import cors from "cors";
 import helmet from "helmet";
 import hpp from "hpp";
 import path from "path";
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/user.js";
@@ -14,7 +16,15 @@ import chatRoutes from "./routes/chat.js";
 import accauntRoutes from "./routes/accaunt.js";
 
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+const envPath = path.join(__dirname, '.env');
+console.log("Putanja do .env:", envPath);
+console.log("Da li fajl postoji:", fs.existsSync(envPath));
+if (fs.existsSync(envPath)) {
+    console.log("Sadržaj fajla (prvih 50 karaktera):", fs.readFileSync(envPath, 'utf8').substring(0, 50));
+}
 
 const app = express();
 app.set('trust proxy', 1);

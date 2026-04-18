@@ -1,7 +1,7 @@
 import express from 'express';
 import auth from "../middleware/auth.js";
 import { getMessages, sendMessage } from '../controllers/chatController.js';
-import { upload } from '../middleware/upload.js';
+import { upload } from '../middleware/cloudinary.js';
 
 const router = express.Router();
 

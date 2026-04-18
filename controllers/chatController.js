@@ -78,7 +78,7 @@ export const sendMessage = async (req, res) => {
         let imageUrls = [];
 
         if (req.files && req.files.length > 0) {
-            imageUrls = req.files.map(file => file.filename);
+            imageUrls = req.files.map(file => file.path);
         }
 
         const message = await Message.create({

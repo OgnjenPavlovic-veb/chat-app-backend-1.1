@@ -1,11 +1,15 @@
+import 'dotenv/config';
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import http from "http";
 import app from "./server.js";
 import { initSocket } from "./socket.js";
 import { attachIO } from "./server.js"
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const PORT = process.env.PORT || 5000;
 
