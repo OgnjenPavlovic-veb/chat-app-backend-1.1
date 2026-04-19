@@ -20,10 +20,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const envPath = path.join(__dirname, '.env');
-console.log("Putanja do .env:", envPath);
-console.log("Da li fajl postoji:", fs.existsSync(envPath));
+console.log("Path to .env:", envPath);
+console.log("Does the file exist:", fs.existsSync(envPath));
 if (fs.existsSync(envPath)) {
-    console.log("Sadržaj fajla (prvih 50 karaktera):", fs.readFileSync(envPath, 'utf8').substring(0, 50));
+    console.log("File content (first 50 characters):", fs.readFileSync(envPath, 'utf8').substring(0, 50));
 }
 
 const app = express();

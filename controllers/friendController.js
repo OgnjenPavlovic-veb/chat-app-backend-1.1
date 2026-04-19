@@ -1,4 +1,5 @@
 import { request } from "express";
+import { getIO } from "../socket.js";
 import FriendRequest from "../models/FriendRequest.js";
 import User from "../models/User.js";
 import Chat from "../models/Chat.js";
@@ -11,13 +12,16 @@ export const sendRequest = async (req, res) => {
         const sender = req.userId;
         const { receiverId } = req.body;
 
+        console.log("Sender:", sender, "Receiver:", receiverId);
+
         if (sender === receiverId) {
             return res.status(400).json({ message: "You cannot add yourself." });
         }
 
         const senderUser = await User.findById(sender);
-        // should fail if sending to yourself.
+        
         if (senderUser.friends.includes(receiverId)) {
+            console.log("Već ste prijatelji");
             return res.status(400).json({ message: "Already friends. "});
         }
 
@@ -30,6 +34,7 @@ export const sendRequest = async (req, res) => {
         });
 
         if (existingRequest) {
+            console.log("Zahtev već postoji");
             return res.status(400).json({ message: "Request already sent." });
         }
 
@@ -40,10 +45,17 @@ export const sendRequest = async (req, res) => {
 
         await Request.save();
 
+        const populated = await FriendRequest.findById(Request._id)
+         .populate("sender", "username profile.image");
+
+        const io = getIO();
+
+        io.to(receiverId.toString()).emit("friend request:new", populated);
+            
         res.json({ message: "Friend request sent."});
 
     } catch (err) {
-        console.error(err);
+        console.error("DEBUG ERROR:", err);
         res.status(500).json({ message: "Server error. "});
     }
 }
@@ -127,6 +139,7 @@ export const getFriends = async (req, res) => {
 
 export const removeFriend = async (req, res) => {
     const session = await mongoose.startSession();
+    let committed = false;
     try {
         session.startTransaction();
         const userId = req.userId;
@@ -165,20 +178,25 @@ export const removeFriend = async (req, res) => {
         }
 
         await session.commitTransaction();
-        await session.endSession();
+        committed = true;
 
-        req.io.to(friendId.toString()).emit("friend removed", {
+
+        const io = getIO();
+
+        io.to(friendId.toString()).emit("friend removed", {
             friendId: userId
         });
 
-        req.io.to(userId.toString()).emit("friend removed", {
+        io.to(userId.toString()).emit("friend removed", {
             friendId: friendId
         });
 
         res.json({ message: "Friend removed" });
 
     } catch (err) {
-        await session.abortTransaction();
+         if (!committed) {
+            await session.abortTransaction();
+        }
 
         console.error(err);
         res.status(500).json({ message: "Server error." });

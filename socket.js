@@ -1,9 +1,14 @@
 import { Server } from "socket.io";
 import Message from "./models/Message.js";
 
+export const onlineUsers = new Map();
+let io;
+
+export const getIO = () => io;
+
 export const initSocket = (server) => {
 
-const io = new Server(server, {
+    io = new Server(server, {
     cors: {
         origin: [
                 "https://chat-app-frontend-1-1.vercel.app", 
@@ -13,7 +18,7 @@ const io = new Server(server, {
     }
 });
 
-const onlineUsers = new Map();
+io.onlineUsers = onlineUsers;
 
 io.on("connection", (socket) => {
     console.log("User connected", socket.id);
@@ -25,14 +30,6 @@ io.on("connection", (socket) => {
 
         io.emit("online users", Array.from(onlineUsers.keys()));
         });
-
-        socket.on("disconnect", () => {
-        if (socket.userId) {
-            onlineUsers.delete(socket.userId);
-        }
-
-        io.emit("online users", Array.from(onlineUsers.keys()));
-    });
 
     socket.on("join chat", (chatId) => {
         socket.join(chatId);
