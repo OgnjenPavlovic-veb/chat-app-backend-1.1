@@ -20,8 +20,18 @@ io.on("connection", (socket) => {
 
     socket.on("setup", (userId) => {
         onlineUsers.set(userId, socket.id);
+        socket.userId = userId;
         socket.join(userId);
-        io.emit("online users", Array.from(onlineUsers.keys()))
+
+        io.emit("online users", Array.from(onlineUsers.keys()));
+        });
+
+        socket.on("disconnect", () => {
+        if (socket.userId) {
+            onlineUsers.delete(socket.userId);
+        }
+
+        io.emit("online users", Array.from(onlineUsers.keys()));
     });
 
     socket.on("join chat", (chatId) => {
