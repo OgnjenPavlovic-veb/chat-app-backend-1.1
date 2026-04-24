@@ -71,7 +71,7 @@ export const getRecommendedUsers = async (req, res) => {
             }
           }, 
           {
-            $sample: { size: 10 }
+            $sample: { size: 12 }
           }
        ]);
        

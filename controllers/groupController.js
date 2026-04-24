@@ -19,7 +19,11 @@ export const createGroupChat = async (req, res) => {
         });
 
         const fullChat = await Chat.findById(chat._id)
-        .populate("users", "username profile.image")
+        .populate("users", "username profile.image");
+
+        if (req.io) {
+            req.io.emit("group list changed");
+        }
 
         res.json(fullChat);
 
@@ -113,6 +117,10 @@ export const addToGroup = async (req, res) => {
         const updated = await Chat.findById(chatId)
         .populate("users", "username profile.image")
         .populate("admin", "username");
+        
+        if (req.io) {
+            req.io.emit("group list changed");
+        }
 
         res.json(updated);
 
@@ -150,10 +158,9 @@ export const removeFromGroup = async (req, res) => {
         .populate("users", "username profile.image")
         .populate("admin", "username");
      
-      if (req.io) {  
-        req.io.to(chatId).emit("group updated", updatedChat);
-        req.io.to(userId).emit("removed from group", { chatId });
-      }
+        if (req.io) {
+            req.io.emit("group list changed");
+        }
 
         res.json(updatedChat);
 
@@ -189,7 +196,7 @@ export const leaveGroup = async (req, res) => {
         .populate("admin", "username");
 
         if (req.io) {
-           req.io.to(chatId).emit("group updated", updatedChat);
+            req.io.emit("group list changed");
         }
 
         res.json({ message: "Successfully left the group." });
