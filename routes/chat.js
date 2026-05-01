@@ -7,7 +7,10 @@ import { createGroupRequest,
          fetchChats, 
          addToGroup, 
          removeFromGroup, 
-         leaveGroup 
+         leaveGroup,
+         groupLimiter,
+         deleteGroup,
+         updateGroup 
         } from "../controllers/groupController.js";
 import { upload } from '../middleware/cloudinary.js';
 
@@ -19,7 +22,7 @@ router.post("/", auth, accessChat);
 
 router.get("/:id", auth, getSingleChat);
 
-router.post("/group", auth, upload.single("image"), createGroupChat);
+router.post("/group", auth, upload.single("image"), groupLimiter, createGroupChat);
 
 router.post("/group/create", auth, createGroupRequest);
 
@@ -30,6 +33,10 @@ router.put("/group/add", auth, addToGroup);
 router.put("/group/remove", auth, removeFromGroup);
 
 router.put("/group/leave", auth, leaveGroup);
+
+router.delete("/deleteGroup", auth, deleteGroup);
+
+router.put("/group/update", auth, upload.single("image"), updateGroup);
 
 
 export default router;

@@ -19,7 +19,7 @@ const router = express.Router();
 router.post("/register", authLimiter, [
     body("username")
     .trim()
-    .isLength({ min: 3, max: 20 })
+    .isLength({ min: 3, max: 25 })
     .escape(),
     body("email")
     .isEmail()
@@ -29,7 +29,7 @@ router.post("/register", authLimiter, [
     .escape(),
     body("password")
     .trim()
-    .isLength({ min: 8, max: 20 })
+    .isLength({ min: 8, max: 25 })
     .custom((value) => {
         if (typeof value !== "string") throw new Error ("Password error, Passwprd je popunjen");
         const trimed = value.trim();

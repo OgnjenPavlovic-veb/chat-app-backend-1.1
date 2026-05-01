@@ -7,7 +7,9 @@ const chatSchema = mongoose.Schema({
     },
     name: {
         type: String,
-        default: ""
+        default: "",
+        trim: true,
+        maxlength: [25]
     },
     users: [{
         type: mongoose.Schema.Types.ObjectId,

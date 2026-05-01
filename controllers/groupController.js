@@ -1,7 +1,9 @@
 import GroupRequest from "../models/GroupRequest.js";
 import Chat from "../models/Chat.js";
+import Message from "../models/Message.js";
 import { json } from "express";
 import User from "../models/User.js";
+import rateLimit from 'express-rate-limit';
 
 
 export const createGroupChat = async (req, res) => {
@@ -205,3 +207,69 @@ export const leaveGroup = async (req, res) => {
         res.status(500).json({ message: "Server error." });
     }
 }
+
+export const deleteGroup = async (req, res) => {
+    try {
+        const { chatId } = req.body;
+        const chat = await Chat.findById(chatId);
+
+        if (!chat) {
+            return res.status(404).json({ message: "Group not found" });
+        }
+
+        if (chat.admin.toString() !== req.userId) {
+            return res.status(403).json({ message: "Only an admin can delete a group." });
+        }
+
+        await Message.deleteMany({ chat: chatId });
+        await Chat.findByIdAndDelete(chatId);
+
+        if (req.io) {
+            req.io.to(chatId).emit("group deleted", { chatId });
+            req.io.emit("group list changed");
+        }
+
+        res.json({ message: "The group and all messages are permanently deleted." });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error. "});
+    }
+}
+
+export const updateGroup = async (req, res) => {
+    try {
+        const { chatId, name } = req.body;
+        const image = req.file ? req.file.path : null;
+
+        const updateData = {};
+        if (name) updateData.name = name;
+        if (image) updateData.groupImage = image;
+
+        const updatedChat = await Chat.findByIdAndUpdate(
+            chatId,
+            { $set: updateData },
+            { returnDocument: "after" }
+        ).populate("users", "username profile.image")
+        .populate("admin", "username");
+
+        if (!updatedChat) return res.status(404).json({ message: "Server error." });
+
+        if (req.io) {
+            req.io.to(chatId).emit("group updated", updatedChat);
+            req.io.emit("group list changed");
+        }
+
+        res.json(updatedChat);
+
+    } catch (err) {
+        console.error("Update Gropu error", err);
+        res.status(500).json({ message: "Server error." });
+    }
+}
+
+export const groupLimiter = rateLimit({
+    windowMs: 15 * 60 *1000,
+    max: 5,
+    message: { message: "Too many requests to create groups, try again late." },
+});

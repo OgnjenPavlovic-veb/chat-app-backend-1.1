@@ -10,6 +10,10 @@ const router = express.Router();
 router.put("/update", auth, async (req, res) => {
     const { username, oldPassword, newPassword } = req.body;
 
+    if (username && username.length > 25) {
+        return res.status(400).json({ message: "Username cannot exceed 25 characters." });
+    }
+
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ message: "User not found. "});
 

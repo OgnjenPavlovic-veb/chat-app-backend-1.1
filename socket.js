@@ -74,6 +74,15 @@ io.on("connection", (socket) => {
         socket.to(chatId).emit("messages seen", { chatId, userId })
     });
 
+    socket.on("delete message", ({ messageId, chatId }) => {
+        socket.to(chatId).emit("message deleted", messageId)
+    });
+
+    socket.on("message updated", (updatedMessage) => {
+        const chatId = updatedMessage.chat;
+        socket.to(chatId).emit("message update received", updatedMessage);
+    });
+
     socket.on("disconnect", () => {
         console.log("User disconnected.");
 
